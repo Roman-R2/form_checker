@@ -1,5 +1,17 @@
 ### IDE ###
 .idea/
 
+### Python ###
+__pycache__/
+
+### ENV ###
+.env
+
+### Django ###
+*.pyc
+
+### BD ###
+*.sqlite3
+
 ### Other ###
 Тестовое задание Python Junior.pdf
