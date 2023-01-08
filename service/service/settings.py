@@ -34,6 +34,7 @@ ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost ").split(" ")
 
 INSTALLED_APPS = [
     # My apps
+    'form_checker',
 
     # Third-party apps
 
@@ -81,8 +82,14 @@ WSGI_APPLICATION = 'service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        "ENGINE": "djongo",
+        "NAME": os.getenv('MONGO_DB_NAME'),
+        "CLIENT": {
+            "host": os.getenv('MONGO_DB_HOST'),
+            "port": int(os.getenv('MONGO_DB_PORT')),
+            "username": os.getenv('MONGO_DB_USERNAME'),
+            "password": os.getenv('MONGO_DB_PASSWORD'),
+        },
     }
 }
 

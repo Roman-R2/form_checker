@@ -1,3 +1,4 @@
+# --- Docker section ----------------------
 docker-build:
 	docker-compose build
 
@@ -24,3 +25,13 @@ docker-logs-mongo-express:
 
 web-app-cli:
 	docker exec -ti web-app sh
+
+# --- Django section ----------------------
+migrate:
+	 docker-compose run --rm web-app sh -c "python manage.py migrate"
+
+makemigrations:
+	 docker-compose run --rm web-app sh -c "python manage.py makemigrations"
+
+createsuperuser:
+	docker-compose run --rm web-app sh -c "python manage.py createsuperuser --no-input"

@@ -13,9 +13,12 @@ services:
       - ./service:/service
     command: >
       sh -c "python manage.py runserver 0.0.0.0:8000"
+    depends_on:
+      - mongo
 
   mongo:
     image: mongo
+    container_name: mongo-web-app
     restart: always
     env_file:
       - ./.env
@@ -25,11 +28,14 @@ services:
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
       MONGO_INITDB_USERNAME: ${MONGO_DB_USERNAME}
       MONGO_INITDB_PASSWORD: ${MONGO_DB_PASSWORD}
+    volumes:
+      - mongo-volume:/data/db
     ports:
       - "27017:27017"
 
   mongo-express:
     image: mongo-express
+    container_name: mongo-express-web-app
     restart: always
     ports:
       - "8081:8081"
@@ -37,3 +43,8 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-volume:
