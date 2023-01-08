@@ -12,9 +12,10 @@ RUN pip install poetry
 RUN poetry config virtualenvs.create false
 RUN poetry install
 
-COPY service /service
+COPY service /web-app/service
+COPY .env /web-app/.env
 
-WORKDIR /service
+WORKDIR /web-app/service
 EXPOSE 8000
 
 RUN adduser --disabled-password service-user
