@@ -35,3 +35,6 @@ makemigrations:
 
 createsuperuser:
 	docker-compose run --rm web-app sh -c "python manage.py createsuperuser --no-input"
+
+add-10-fake-forms:
+	docker-compose run --rm web-app sh -c "python manage.py add_fake_forms 10"

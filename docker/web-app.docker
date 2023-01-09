@@ -1,5 +1,9 @@
 FROM python:3.10.9-alpine
 
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 # Copy dependency files and code
 COPY poetry.lock /temp/poetry.lock
 COPY pyproject.toml /temp/pyproject.toml
@@ -11,9 +15,6 @@ RUN pip install --upgrade pip
 RUN pip install poetry
 RUN poetry config virtualenvs.create false
 RUN poetry install
-
-COPY service /web-app/service
-COPY .env /web-app/.env
 
 WORKDIR /web-app/service
 EXPOSE 8000
