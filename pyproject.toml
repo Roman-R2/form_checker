@@ -15,6 +15,7 @@ pymongo = "3.12.3"
 faker = "^15.3.4"
 isort = "^5.11.4"
 flake8 = "^6.0.0"
+email-validate = "^1.1.2"
 
 
 [build-system]
