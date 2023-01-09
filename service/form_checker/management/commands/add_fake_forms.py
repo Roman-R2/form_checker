@@ -2,14 +2,12 @@
 Command add some fake forms into MongoDB
 """
 import os
-from pprint import pprint
-from random import randint, choice
+from random import choice, randint
 
-from django.conf import settings
 from django.core.management import BaseCommand
+from faker import Faker
 from pymongo import MongoClient
 from pymongo.errors import CollectionInvalid
-from faker import Faker
 
 from form_checker.services import FormType
 

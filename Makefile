@@ -25,6 +25,7 @@ docker-logs-mongo-express:
 
 web-app-cli:
 	docker exec -ti web-app sh
+# --------------------------------------------
 
 # --- Django section ----------------------
 migrate:
@@ -38,3 +39,10 @@ createsuperuser:
 
 add-10-fake-forms:
 	docker-compose run --rm web-app sh -c "python manage.py add_fake_forms 10"
+# --------------------------------------------
+
+# --- Code section ----------------------
+check-code:
+	docker-compose run --rm web-app sh -c "isort form_checker/ service/"
+	docker-compose run --rm web-app sh -c "flake8 --extend-ignore E501,F401 form_checker/ service/"
+# --------------------------------------------
