@@ -12,10 +12,10 @@ docker-down:
 	docker-compose down --remove-orphans
 
 docker-logs:
-	docker-compose -f docker-compose.yml logs
+	docker-compose -f docker-compose.yml logs -f
 
 docker-logs-web-app:
-	docker-compose -f docker-compose.yml logs web-app
+	docker-compose -f docker-compose.yml logs web-app -f
 
 docker-logs-mongo:
 	docker-compose -f docker-compose.yml logs mongo -f
