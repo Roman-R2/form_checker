@@ -1,3 +1,5 @@
+first-start: docker-build-up makemigrations migrate createsuperuser add-10-fake-forms
+
 # --- Docker section ----------------------
 docker-build:
 	docker-compose build
@@ -10,6 +12,9 @@ docker-build-up:
 
 docker-down:
 	docker-compose down --remove-orphans
+
+docker-down-remove-volumes:
+	docker-compose down -v --remove-orphans
 
 docker-logs:
 	docker-compose -f docker-compose.yml logs -f
@@ -47,5 +52,5 @@ add-10-fake-forms:
 # --- Code section ----------------------
 check-code:
 	docker-compose run --rm web-app sh -c "isort form_checker/ service/"
-	docker-compose run --rm web-app sh -c "flake8 --extend-ignore E501,F401 form_checker/ service/"
+	docker-compose run --rm web-app sh -c "flake8 --extend-ignore E501,F401,W605 form_checker/ service/"
 # --------------------------------------------

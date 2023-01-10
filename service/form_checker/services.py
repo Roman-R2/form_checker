@@ -1,8 +1,12 @@
+import os
 import re
 from abc import ABC, abstractmethod
 from datetime import datetime
 from enum import Enum
+
 from email_validate import validate
+from pymongo import MongoClient
+from pymongo.errors import CollectionInvalid
 
 
 class FormType(Enum):
@@ -108,3 +112,54 @@ class ProcessTypeValidationChain:
 
     def get_data_dto(self) -> DataDTO:
         return self.validation_chain.handle(self.data)
+
+
+class ServiceMongoClient:
+    def __init__(self):
+        self.mongo_client = MongoClient(os.getenv('MONGO_DB_URI'))
+        self.db = self.mongo_client[os.getenv('MONGO_DB_NAME')]
+
+    def get_collection_form_checker(self):
+        form_collection_name = os.getenv('FORM_COLLECTION_NAME')
+        try:
+            collection = self.db.create_collection(name=form_collection_name)
+        except CollectionInvalid:
+            collection = self.db.get_collection(name=form_collection_name)
+        return collection
+
+    def close_mongo_client(self):
+        self.mongo_client.close()
+
+
+class FindSuitableFormInDB:
+    """ Find suitable form in DB. """
+
+    def __init__(self, form_canvas):
+        self.form_canvas = form_canvas
+        self.mongo_client = ServiceMongoClient()
+        self.form_checker_collection = self.mongo_client.get_collection_form_checker()
+
+    # Refactoring required
+    def conclusion(self):
+        # Select the appropriate form fields
+        temp_query_results = {}
+        temp_query_id = None
+        for key, value in self.form_canvas.items():
+            temp_form_result = self.form_checker_collection.find_one({key: value})
+            if temp_query_id is None and temp_form_result is not None:
+                temp_query_id = temp_form_result['_id']
+            if temp_form_result is not None and temp_query_id == temp_form_result['_id']:
+                temp_query_results.update({
+                    key: value,
+                })
+
+        finish_query_result = self.form_checker_collection.find_one(temp_query_results)
+        # Close mongo_client connection
+        self.mongo_client.close_mongo_client()
+        if finish_query_result is None:
+            return None
+
+        # If count of fields not equal that means not suitable form
+        if len(finish_query_result) - 2 != len(temp_query_results):
+            finish_query_result = None
+        return finish_query_result

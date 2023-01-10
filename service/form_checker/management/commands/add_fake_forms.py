@@ -1,15 +1,12 @@
 """
 Command add some fake forms into MongoDB
 """
-import os
 from random import choice, randint
 
 from django.core.management import BaseCommand
 from faker import Faker
-from pymongo import MongoClient
-from pymongo.errors import CollectionInvalid
 
-from form_checker.services import FormType
+from form_checker.services import FormType, ServiceMongoClient
 
 
 class Command(BaseCommand):
@@ -35,18 +32,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        form_collection_name = os.getenv('FORM_COLLECTION_NAME')
+        service_obj = ServiceMongoClient()
+        collection = service_obj.get_collection_form_checker()
 
-        with MongoClient(os.getenv('MONGO_DB_URI')) as client:
-            db = client[os.getenv('MONGO_DB_NAME')]
-            try:
-                collection = db.create_collection(name=os.getenv('FORM_COLLECTION_NAME'))
-            except CollectionInvalid:
-                print(f"Collection {form_collection_name} already exists")
-                collection = db.get_collection(name=form_collection_name)
+        # Generate forms
+        for item in range(options['number_of_fake_forms']):
+            collection.insert_one(self.get_fake_form())
 
-            # Generate forms
-            for item in range(options['number_of_fake_forms']):
-                collection.insert_one(self.get_fake_form())
+        service_obj.close_mongo_client()
 
-        print(f"Added {options['number_of_fake_forms']} fake forms in {form_collection_name} collection")
+        print(f"Added {options['number_of_fake_forms']} fake forms in {collection.full_name}")

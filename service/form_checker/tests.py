@@ -1,39 +1,30 @@
-import os
+from django.test import TestCase
 
-from django.test import TestCase, Client
-from pymongo import MongoClient
-from pymongo.errors import CollectionInvalid
-
-from form_checker.services import FormType
+from form_checker.services import FormType, ServiceMongoClient
 from service import status
 
 
 class FormCheckerTest(TestCase):
+    service_obj = ServiceMongoClient()
+    collection = service_obj.get_collection_form_checker()
+
     def setUp(self):
-        form_collection_name = os.getenv('FORM_COLLECTION_NAME')
-
-        self.mongo_client = MongoClient(os.getenv('MONGO_DB_URI'))
-        db = self.mongo_client[os.getenv('MONGO_DB_NAME')]
-        try:
-            collection = db.create_collection(name=os.getenv('FORM_COLLECTION_NAME'))
-        except CollectionInvalid:
-            collection = db.get_collection(name=form_collection_name)
-
         # Generate test forms
         form_1 = {
             "name": "Name form 1",
             "field_name_1": FormType.EMAIL.value,
             "field_name_2": FormType.PHONE_NUMBER.value
         }
-        collection.insert_one(form_1)
+        self.collection.insert_one(form_1)
 
         form_2 = {
             "name": "Name form 2",
             "user_login": FormType.TEXT.value,
             "user_phone": FormType.PHONE_NUMBER.value,
             "user_email": FormType.EMAIL.value,
+            "last_login_date": FormType.DATE.value,
         }
-        collection.insert_one(form_2)
+        self.collection.insert_one(form_2)
 
     def test_get_form_post(self):
         response = self.client.post('/get_form/')
@@ -71,5 +62,64 @@ class FormCheckerTest(TestCase):
         )
         self.assertEqual(response.json(), assert_response_data)
 
+    def test_get_form_1(self):
+        post_data = {
+            "field_name_1": "some@maiil.ru",
+            "field_name_2": "+79993335577"
+        }
+        response = self.client.post(
+            path='/get_form/',
+            data=post_data
+        )
+        assert_response_data = {
+            "name": "Name form 1",
+        }
+        self.assertEqual(response.json(), assert_response_data)
+
+    def test_get_form_1_not_all_fields(self):
+        post_data = {
+            "field_name_1": "some@maiil.ru",
+        }
+        response = self.client.post(
+            path='/get_form/',
+            data=post_data
+        )
+        assert_response_data = {
+            'field_name_1': 'email',
+        }
+        self.assertEqual(response.json(), assert_response_data)
+
+    def test_get_form_1_more_fields(self):
+        post_data = {
+            "field_name_0": "2023-01-09",
+            "field_name_1": "some@maiil.ru",
+            "field_name_2": "+79993335577",
+            "field_name_3": "Test text",
+        }
+        response = self.client.post(
+            path='/get_form/',
+            data=post_data
+        )
+        assert_response_data = {
+            "name": "Name form 1",
+        }
+        self.assertEqual(response.json(), assert_response_data)
+
+    def test_get_form_2(self):
+        post_data = {
+            "user_login": "Text login",
+            "user_phone": "+79513456789",
+            "user_email": "my@mail.ru",
+            "last_login_date": "09.01.2023",
+        }
+        response = self.client.post(
+            path='/get_form/',
+            data=post_data
+        )
+        assert_response_data = {
+            "name": "Name form 2",
+        }
+        self.assertEqual(response.json(), assert_response_data)
+
     def tearDown(self) -> None:
-        self.mongo_client.close()
+        self.service_obj.close_mongo_client()
