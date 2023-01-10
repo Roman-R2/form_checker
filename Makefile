@@ -1,5 +1,7 @@
 first-start: docker-build-up makemigrations migrate createsuperuser add-10-fake-forms
 
+start: docker-up
+
 # --- Docker section ----------------------
 docker-build:
 	docker-compose build
